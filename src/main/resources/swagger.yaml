@@ -1,0 +1,42 @@
+openapi: 3.0.2
+info:
+  title: "Netherlands city temperature API"
+  description: "Specification of API to retrieve temperature for cities within the Netherlands."
+  version: "1.0.0"
+servers:
+  - url: http://localhost:12345/
+paths:
+
+  /v1/temperature/{city}:
+    get:
+      summary: "Get temperature (in degrees Celcius) in specified city inside the Netherlands"
+      operationId: "getTemp"
+      parameters:
+        - in: path
+          name: city
+          description: "Name of city (within Netherlands) for which to retrieve temperature."
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: "Temperature in the Netherlands"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  time:
+                    description: "Timestamp at which this temperature was measured"
+                    type: string
+                    format: date-time
+                  temperature:
+                    description: "Temperature in degrees Celcius, with precision 2"
+                    type: number
+                    example: "16.45"
+        "404":
+          description: "(Temperature for) requested city could not be found"
+        "500":
+          description: "Internal server error"
+        "503":
+          description: "Service unavailable"
