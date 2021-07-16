@@ -46,7 +46,7 @@ public class TemperatureService {
     }
   }
 
-  @Scheduled(fixedRateString = "${temperature.fetch.time.interval}")
+  @Scheduled(fixedDelayString  = "${temperature.fetch.time.interval}")
   public void scheduleGetTemperature() {
     log.info("Running FetchTemperaturesTask");
     cityRepository.findAll().stream()
