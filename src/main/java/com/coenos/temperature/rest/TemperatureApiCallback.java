@@ -30,27 +30,28 @@ public class TemperatureApiCallback implements ApiCallback<InlineResponse200> {
         this.city.getName(),
         statusCode,
         e.getMessage());
+
+    if (statusCode == 404) {
+      log.info("City {} not found, will be deleted from DB.", city.getName());
+      this.cityRepository.delete(this.city);
+    }
   }
 
   @Override
   public void onSuccess(
       InlineResponse200 result, int statusCode, Map<String, List<String>> responseHeaders) {
 
-    if (statusCode == 404) {
-      this.cityRepository.delete(this.city);
-    } else {
-      TemperatureData data =
-          TemperatureData.builder()
-              .city(this.city)
-              .temperature(result.getTemperature().doubleValue())
-              .requestTime(OffsetDateTime.now())
-              .temperatureTime(
-                  OffsetDateTime.parse(
-                      result.getTime().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)))
-              .build();
+    TemperatureData data =
+        TemperatureData.builder()
+            .city(this.city)
+            .temperature(result.getTemperature().doubleValue())
+            .requestTime(OffsetDateTime.now())
+            .temperatureTime(
+                OffsetDateTime.parse(
+                    result.getTime().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)))
+            .build();
 
-      log.info(data.toFormattedString());
-    }
+    log.info(data.toFormattedString());
   }
 
   @Override

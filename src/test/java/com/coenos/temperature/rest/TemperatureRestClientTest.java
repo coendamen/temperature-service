@@ -59,8 +59,8 @@ class TemperatureRestClientTest {
     Mockito.when(defaultApi.getTempAsync(any(String.class), any(ApiCallback.class)))
         .thenAnswer(
             invocation -> {
-              ((ApiCallback<InlineResponse200>) invocation.getArguments()[1])
-                  .onSuccess(new InlineResponse200(), 404, null);
+              ((ApiCallback<ApiException>) invocation.getArguments()[1])
+                  .onFailure(new ApiException(), 404, null);
 
               verify(cityRepository).delete(city);
               return null;
