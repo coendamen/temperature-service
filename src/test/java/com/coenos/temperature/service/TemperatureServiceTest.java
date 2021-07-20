@@ -2,17 +2,14 @@ package com.coenos.temperature.service;
 
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 import com.coenos.temperature.model.City;
 import com.coenos.temperature.model.Period;
-import com.coenos.temperature.model.TemperatureData;
 import com.coenos.temperature.repository.CityRepository;
-import com.coenos.temperature.rest.RestClientException;
 import com.coenos.temperature.rest.TemperatureRestClient;
-import java.time.OffsetDateTime;
 import java.util.Collections;
 import javax.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +19,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.AssertionErrors;
 
 @ExtendWith(MockitoExtension.class)
 class TemperatureServiceTest {
@@ -53,42 +49,16 @@ class TemperatureServiceTest {
   }
 
   @Test
-  void happyFlow() throws RestClientException {
+  void happyFlow() {
 
     City testCity = City.builder().name("Veldhoven").build();
 
-    TemperatureData temperatureData =
-        TemperatureData.builder()
-            .temperatureTime(OffsetDateTime.now())
-            .temperature(10.1)
-            .requestTime(OffsetDateTime.now())
-            .city(testCity)
-            .build();
-
     when(cityRepository.findAll())
         .thenReturn(Collections.singletonList(City.builder().name("Veldhoven").build()));
-    when(temperatureRestClient.getTemperature(testCity)).thenReturn(temperatureData);
 
     temperatureService.scheduleGetTemperature();
 
     verify(this.temperatureRestClient).getTemperature(restClientCityCaptor.capture());
-    AssertionErrors.assertTrue("", restClientCityCaptor.getValue().equals(testCity));
-  }
-
-  @Test
-  void error() throws RestClientException {
-
-    City testCity = City.builder().name("Veldhoven").build();
-
-    when(cityRepository.findAll())
-        .thenReturn(Collections.singletonList(City.builder().name("Veldhoven").build()));
-
-    doThrow(RestClientException.builder().httpStatusCode(404).build())
-        .when(temperatureRestClient)
-        .getTemperature(testCity);
-
-    temperatureService.scheduleGetTemperature();
-
-    verify(this.cityRepository).delete(testCity);
+    assertTrue("", restClientCityCaptor.getValue().equals(testCity));
   }
 }
