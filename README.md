@@ -1,5 +1,5 @@
 ## assumptions / remarks
-- use synchronous call to rest service, assuming it returns within min amount of schedule time
+- use asynchronous call to rest service, to make sure it runs within the interval, and not blocking in case of network delay.
 - I fixed and error in the yaml (query iso path param {city}) and I added some host related info there
 - I used editor.swagger.io for client generation. I took a shortcut there to add the code to the source but 
 of course this should be added as a separate lib. I am not sure if any maven open-api plugin also generates client code 
@@ -25,6 +25,9 @@ I use a @Scheduled method, for easy configuration sake. This can be solved in ot
 There is a **TemperatureRestClient** that wraps the client API because I do no want to
 clutter the code with the getTemp service client code. This client returns the data we are interested
 in, the **TemperatureData**, or wraps a ApiClientException as a **RestClientException**.
+The Temperature client makes use of an ApiCallback implementation named **TemperatureApiCallBack** which
+handles the results. In case of a 404, it deletes the City from the DB. In case of 200, it prints the
+TemperatureData.
 
 The **TemperatureData** object is full of DDD (Domain Driven Design) functions where I let the
 domain object do its own "computations/formatting".

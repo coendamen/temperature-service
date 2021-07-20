@@ -1,9 +1,11 @@
 package com.coenos.temperature.rest;
 
-import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 import com.coenos.temperature.model.City;
-import com.coenos.temperature.model.TemperatureData;
+import com.coenos.temperature.repository.CityRepository;
+import io.swagger.client.ApiCallback;
 import io.swagger.client.ApiException;
 import io.swagger.client.api.DefaultApi;
 import io.swagger.client.model.InlineResponse200;
@@ -19,21 +21,61 @@ import org.threeten.bp.OffsetDateTime;
 class TemperatureRestClientTest {
 
   @Mock private DefaultApi defaultApi;
+  @Mock private CityRepository cityRepository;
 
   @Test
   void getTemp() throws RestClientException, ApiException {
 
-    TemperatureRestClient temperatureRestClient = new TemperatureRestClient(this.defaultApi);
+    TemperatureRestClient temperatureRestClient =
+        new TemperatureRestClient(this.defaultApi, this.cityRepository);
 
     City city = City.builder().name("Veldhoven").build();
     InlineResponse200 response200 = new InlineResponse200();
     response200.setTemperature(BigDecimal.valueOf(10.1));
     response200.setTime(OffsetDateTime.now());
 
-    Mockito.when(this.defaultApi.getTemp(city.getName())).thenReturn(response200);
+    InlineResponse200 inlineResponse200 = new InlineResponse200();
+    inlineResponse200.temperature(BigDecimal.valueOf(10.1d));
+    inlineResponse200.setTime(OffsetDateTime.now());
 
-    TemperatureData temperatureData = temperatureRestClient.getTemperature(city);
+    Mockito.when(defaultApi.getTempAsync(any(String.class), any(ApiCallback.class)))
+        .thenAnswer(
+            invocation -> {
+              ((ApiCallback<InlineResponse200>) invocation.getArguments()[1])
+                  .onSuccess(inlineResponse200, 200, null);
 
-    assertEquals("", "50.2", temperatureData.getTemperatureInFahrenheit());
+              Mockito.verifyNoInteractions(cityRepository);
+              return null;
+            });
+
+    temperatureRestClient.getTemperature(city);
+  }
+
+  @Test
+  void getTempNotFound() throws RestClientException, ApiException {
+
+    TemperatureRestClient temperatureRestClient =
+        new TemperatureRestClient(this.defaultApi, this.cityRepository);
+
+    City city = City.builder().name("Veldhoven").build();
+    InlineResponse200 response200 = new InlineResponse200();
+    response200.setTemperature(BigDecimal.valueOf(10.1));
+    response200.setTime(OffsetDateTime.now());
+
+    InlineResponse200 inlineResponse200 = new InlineResponse200();
+    inlineResponse200.temperature(BigDecimal.valueOf(10.1d));
+    inlineResponse200.setTime(OffsetDateTime.now());
+
+    Mockito.when(defaultApi.getTempAsync(any(String.class), any(ApiCallback.class)))
+        .thenAnswer(
+            invocation -> {
+              ((ApiCallback<InlineResponse200>) invocation.getArguments()[1])
+                  .onSuccess(inlineResponse200, 404, null);
+
+              verify(cityRepository).delete(city);
+              return null;
+            });
+
+    temperatureRestClient.getTemperature(city);
   }
 }

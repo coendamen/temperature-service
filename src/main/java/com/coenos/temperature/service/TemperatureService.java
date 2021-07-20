@@ -54,7 +54,7 @@ public class TemperatureService {
         .forEach(
             city -> {
               try {
-                log.info(temperatureRestClient.getTemperature(city).toFormattedString());
+                temperatureRestClient.getTemperature(city);
               } catch (RestClientException e) {
                 this.handleException(city, e);
               }

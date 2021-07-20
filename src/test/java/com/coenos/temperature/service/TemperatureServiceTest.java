@@ -8,11 +8,9 @@ import static org.mockito.Mockito.when;
 
 import com.coenos.temperature.model.City;
 import com.coenos.temperature.model.Period;
-import com.coenos.temperature.model.TemperatureData;
 import com.coenos.temperature.repository.CityRepository;
 import com.coenos.temperature.rest.RestClientException;
 import com.coenos.temperature.rest.TemperatureRestClient;
-import java.time.OffsetDateTime;
 import java.util.Collections;
 import javax.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,17 +55,8 @@ class TemperatureServiceTest {
 
     City testCity = City.builder().name("Veldhoven").build();
 
-    TemperatureData temperatureData =
-        TemperatureData.builder()
-            .temperatureTime(OffsetDateTime.now())
-            .temperature(10.1)
-            .requestTime(OffsetDateTime.now())
-            .city(testCity)
-            .build();
-
     when(cityRepository.findAll())
         .thenReturn(Collections.singletonList(City.builder().name("Veldhoven").build()));
-    when(temperatureRestClient.getTemperature(testCity)).thenReturn(temperatureData);
 
     temperatureService.scheduleGetTemperature();
 
