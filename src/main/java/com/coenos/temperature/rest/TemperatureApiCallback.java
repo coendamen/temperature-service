@@ -54,8 +54,12 @@ public class TemperatureApiCallback implements ApiCallback<InlineResponse200> {
   }
 
   @Override
-  public void onUploadProgress(long bytesWritten, long contentLength, boolean done) {}
+  public void onUploadProgress(long bytesWritten, long contentLength, boolean done) {
+    //
+  }
 
   @Override
-  public void onDownloadProgress(long bytesRead, long contentLength, boolean done) {}
+  public void onDownloadProgress(long bytesRead, long contentLength, boolean done) {
+    //
+  }
 }

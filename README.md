@@ -23,11 +23,12 @@ rules like @Min, @Max with proper error messages.
 I use a @Scheduled method, for easy configuration sake. This can be solved in other ways (e.g. TimerTask) depending on what the requirements are.
 
 There is a **TemperatureRestClient** that wraps the client API because I do no want to
-clutter the code with the getTemp service client code. This client returns the data we are interested
-in, the **TemperatureData**, or wraps a ApiClientException as a **RestClientException**.
-The Temperature client makes use of an ApiCallback implementation named **TemperatureApiCallBack** which
-handles the results. In case of a 404, it deletes the City from the DB. In case of 200, it prints the
+clutter the code with the getTemp service client code. This client uses asynchronous calls to the getTemp api
+and uses an implementation of **TemperatureApiCallBack** to handle the Promises of the ApiCallback.
+In case of success (HTTP 200), the data is transformed into a **TemperatureData** object and printed to the console.
+In case of a 404, it deletes the City from the DB. In case of 200, it prints the
 TemperatureData.
+In case of failure (for instance ConnectException), the error is printed to the console.
 
 The **TemperatureData** object is full of DDD (Domain Driven Design) functions where I let the
 domain object do its own "computations/formatting".

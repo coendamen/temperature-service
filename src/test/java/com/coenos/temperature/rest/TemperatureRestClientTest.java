@@ -24,15 +24,12 @@ class TemperatureRestClientTest {
   @Mock private CityRepository cityRepository;
 
   @Test
-  void getTemp() throws RestClientException, ApiException {
+  void getTemp() throws ApiException {
 
     TemperatureRestClient temperatureRestClient =
         new TemperatureRestClient(this.defaultApi, this.cityRepository);
 
     City city = City.builder().name("Veldhoven").build();
-    InlineResponse200 response200 = new InlineResponse200();
-    response200.setTemperature(BigDecimal.valueOf(10.1));
-    response200.setTime(OffsetDateTime.now());
 
     InlineResponse200 inlineResponse200 = new InlineResponse200();
     inlineResponse200.temperature(BigDecimal.valueOf(10.1d));
@@ -52,25 +49,18 @@ class TemperatureRestClientTest {
   }
 
   @Test
-  void getTempNotFound() throws RestClientException, ApiException {
+  void getTempNotFound() throws ApiException {
 
     TemperatureRestClient temperatureRestClient =
         new TemperatureRestClient(this.defaultApi, this.cityRepository);
 
     City city = City.builder().name("Veldhoven").build();
-    InlineResponse200 response200 = new InlineResponse200();
-    response200.setTemperature(BigDecimal.valueOf(10.1));
-    response200.setTime(OffsetDateTime.now());
-
-    InlineResponse200 inlineResponse200 = new InlineResponse200();
-    inlineResponse200.temperature(BigDecimal.valueOf(10.1d));
-    inlineResponse200.setTime(OffsetDateTime.now());
 
     Mockito.when(defaultApi.getTempAsync(any(String.class), any(ApiCallback.class)))
         .thenAnswer(
             invocation -> {
               ((ApiCallback<InlineResponse200>) invocation.getArguments()[1])
-                  .onSuccess(inlineResponse200, 404, null);
+                  .onSuccess(new InlineResponse200(), 404, null);
 
               verify(cityRepository).delete(city);
               return null;

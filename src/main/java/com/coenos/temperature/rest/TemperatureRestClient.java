@@ -19,16 +19,17 @@ public class TemperatureRestClient {
     this.cityRepository = cityRepository;
   }
 
-  public void getTemperature(final City city) throws RestClientException {
+  public void getTemperature(final City city) {
 
     try {
       this.defaultApi.getTempAsync(
-          city.getName(), new TemperatureApiCallback(city, cityRepository));
+          city.getName(), new TemperatureApiCallback(city, this.cityRepository));
     } catch (ApiException e) {
-      throw RestClientException.builder()
-          .httpStatusCode(e.getCode())
-          .message(e.getMessage())
-          .build();
+      log.error(
+          "ApiException while getting temperature for city {}. Code : {}",
+          city.getName(),
+          e.getCode(),
+          e);
     }
   }
 }

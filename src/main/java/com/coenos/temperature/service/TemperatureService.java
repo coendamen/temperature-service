@@ -1,9 +1,7 @@
 package com.coenos.temperature.service;
 
-import com.coenos.temperature.model.City;
 import com.coenos.temperature.model.Period;
 import com.coenos.temperature.repository.CityRepository;
-import com.coenos.temperature.rest.RestClientException;
 import com.coenos.temperature.rest.TemperatureRestClient;
 import java.util.Set;
 import javax.annotation.PostConstruct;
@@ -49,28 +47,6 @@ public class TemperatureService {
   @Scheduled(fixedRateString = "${temperature.fetch.time.interval}")
   public void scheduleGetTemperature() {
     log.info("Running FetchTemperaturesTask");
-    cityRepository.findAll().stream()
-        .limit(5)
-        .forEach(
-            city -> {
-              try {
-                temperatureRestClient.getTemperature(city);
-              } catch (RestClientException e) {
-                this.handleException(city, e);
-              }
-            });
-  }
-
-  private void handleException(City city, RestClientException e) {
-    if (e.getHttpStatusCode() == 404) {
-      log.error("City {} Not Found, will be deleted from db", city);
-      this.cityRepository.delete(city);
-    } else {
-      log.error(
-          "RestClientException occurred with code {} for city {}. ErrorMessage : {}",
-          e.getHttpStatusCode(),
-          city,
-          e.getMessage());
-    }
+    this.cityRepository.findAll().stream().limit(5).forEach(temperatureRestClient::getTemperature);
   }
 }
